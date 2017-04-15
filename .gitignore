@@ -1,3 +1,7 @@
+*~
+output/*/chains/*
+output/*/figures/*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
