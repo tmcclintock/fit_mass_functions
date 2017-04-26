@@ -8,14 +8,14 @@ import matplotlib.pyplot as plt
 
 ################################################
 #CREATE THE OUTPUT FILES FROM SCRATCH OR NO?
-from_scratch = True
+from_scratch = False
 ################################################
 
 #Choose which modes to run
 run_test = False
-run_best_fit = True
+run_best_fit = False
 run_bf_comparisons = False
-run_mcmc = True
+run_mcmc = False
 run_mcmc_comparisons = False
 calculate_chi2 = True
 see_corner = False
@@ -184,7 +184,7 @@ for i in xrange(box_lo,box_hi):
         fig = corner.corner(chain,labels=corner_labels,plot_datapoints=False)
         plt.gcf().savefig(base_dir+"figures/Box%03d_corner.png"%(i))
         plt.show()
-        plt.close()
+        plt.close()        
 
     #Save the models
     np.savetxt(base_save+"bests.txt",best_fit_models,header=header)
@@ -192,4 +192,3 @@ for i in xrange(box_lo,box_hi):
     np.savetxt(base_save+"vars.txt",var_models,header=header)
     np.savetxt(base_save+"BFchi2s.txt",chi2s)
     continue #end loop over boxes/cosmologies
-    
