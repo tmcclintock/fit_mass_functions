@@ -4,6 +4,8 @@ for doing the fits to create training data.
 """
 import numpy as np
 
+Tinker_defaults = {'d':1.97, 'e':1.0, "f": 0.51, 'g':1.228}
+
 #Likelihood without scatter. Can run much faster
 def lnlike_no_scatter(d,e,f,g,a,z,lM_bins,N_data,cov_data,icov_data,volume,MF_model):
     Len = len(a)
@@ -20,11 +22,11 @@ def lnlike_no_scatter(d,e,f,g,a,z,lM_bins,N_data,cov_data,icov_data,volume,MF_mo
 
 #Posterior
 def lnprob(params,a,z,lM_bins,N_data,cov_data,icov_data,volume,MF_model):
-    e0,e1,f0,f1,g0,g1 = params
+    d0,d1,e0,e1,g0,g1 = params
     k = a-0.5
-    d = np.ones_like(k) * 1.97#d0 + k*d1
+    d = d0 + k*d1
     e = e0 + k*e1
-    f = f0 + k*f1
+    f = np.ones_like(k)*Tinker_defaults['f']#f0 + k*f1
     g = g0 + k*g1
     if any(d<0) or any(d>5): return -np.inf
     if any(e<0) or any(e>5): return -np.inf

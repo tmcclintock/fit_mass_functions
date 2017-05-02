@@ -1,6 +1,6 @@
 import numpy as np
 import scipy.optimize as op
-import emcee, sys, corner
+import emcee, sys, corner, os
 import visualize
 import tinker_mass_function as TMF
 import training_likelihoods as TL
@@ -8,17 +8,17 @@ import matplotlib.pyplot as plt
 
 ################################################
 #CREATE THE OUTPUT FILES FROM SCRATCH OR NO?
-from_scratch = False
+from_scratch = True
 ################################################
 
 #Choose which modes to run
-run_test = False
-run_best_fit = False
+run_test = True
+run_best_fit = True
 run_bf_comparisons = False
 run_mcmc = False
 run_mcmc_comparisons = False
 calculate_chi2 = False
-see_corner = True
+see_corner = False
 
 #MCMC configuration
 nwalkers, nsteps = 16, 5000
@@ -40,14 +40,15 @@ data_path = "N_data/Box%03d/Box%03d_Z%d.txt"
 cov_path  = "N_data/Box%03d/Box%03d_cov_Z%d.txt"
 
 #This contains our parameterization
+name = 'def'
 N_parameters = 6
-corner_labels = [r"$e0$",r"$e1$",r"$f0$",r"$f1$",r"$g0$",r"$g1$"]
+corner_labels = [r"$d0$",r"$d1$",r"$e0$",r"$e1$",r"$g0$",r"$g1$"]
 Tinker_defaults = {'d':1.97, 'e':1.0, "f": 0.51, 'g':1.228}
-guesses = np.array([1.1, 0.2, 0.41,0.15, 1.25,0.11]) #e0,e1,f0,f1,g0,g1
+guesses = np.array([2.13, 0.11, 1.1, 0.2, 1.25, 0.11]) #d0,d1,e0,e1,g0,g1
 #guesses = np.array([2.13, 0.11, 1.1, 0.2, 0.41, 0.15, 1.25, 0.11]) #d0,d1,e0,e1,f0,f1,g0,g1
-header = "e0\te1\tf0\tf1\tg0\tg1"
+header = "d0\td1\te0\te1\tg0\tg1"
 #header = "d0\td1\te0\te1\tf0\tf1\tg0\tg1"
-def get_params(model,sf):
+def get_params(model, sf):
     e0,e1,f0,f1,g0,g1 = model
     k = sf - 0.5
     d = Tinker_defaults['d']
@@ -57,8 +58,9 @@ def get_params(model,sf):
     return d,e,f,g
 
 #Create the output files
-base_dir = "output/efg/"
-base_save = base_dir+"efg_"
+base_dir = "output/%s/"%name
+os.system("mkdir -p %s"%base_dir)
+base_save = base_dir+"%s_"%name
 if from_scratch:
     best_fit_models = np.zeros((N_boxes,N_parameters))
     np.savetxt(base_save+"bests.txt",best_fit_models)
@@ -140,7 +142,7 @@ for i in xrange(box_lo,box_hi):
                                         args=(scale_factors,redshifts,lM_bin_array,
                                               N_data_array,cov_array,icov_array,volume,
                                               TMF_array))
-        print "Performing MCMC on Box%03d"%(i)
+        print "Performing MCMC on Box%03d for %s"%(i, name)
         sampler.run_mcmc(pos,nsteps)
         print "MCMC complete for Box%03d\n"%(i)
         fullchain = sampler.flatchain
@@ -187,8 +189,8 @@ for i in xrange(box_lo,box_hi):
         plt.close()        
 
     #Save the models
-    #np.savetxt(base_save+"bests.txt",best_fit_models,header=header)
-    #np.savetxt(base_save+"means.txt",mean_models,header=header)
-    #np.savetxt(base_save+"vars.txt",var_models,header=header)
-    #np.savetxt(base_save+"BFchi2s.txt",chi2s)
+    np.savetxt(base_save+"bests.txt",best_fit_models,header=header)
+    np.savetxt(base_save+"means.txt",mean_models,header=header)
+    np.savetxt(base_save+"vars.txt",var_models,header=header)
+    np.savetxt(base_save+"BFchi2s.txt",chi2s)
     continue #end loop over boxes/cosmologies
