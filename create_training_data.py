@@ -17,8 +17,8 @@ run_best_fit = False
 run_bf_comparisons = False
 run_mcmc = False
 run_mcmc_comparisons = False
-calculate_chi2 = True
-see_corner = False
+calculate_chi2 = False
+see_corner = True
 
 #MCMC configuration
 nwalkers, nsteps = 16, 5000
@@ -187,8 +187,8 @@ for i in xrange(box_lo,box_hi):
         plt.close()        
 
     #Save the models
-    np.savetxt(base_save+"bests.txt",best_fit_models,header=header)
-    np.savetxt(base_save+"means.txt",mean_models,header=header)
-    np.savetxt(base_save+"vars.txt",var_models,header=header)
-    np.savetxt(base_save+"BFchi2s.txt",chi2s)
+    #np.savetxt(base_save+"bests.txt",best_fit_models,header=header)
+    #np.savetxt(base_save+"means.txt",mean_models,header=header)
+    #np.savetxt(base_save+"vars.txt",var_models,header=header)
+    #np.savetxt(base_save+"BFchi2s.txt",chi2s)
     continue #end loop over boxes/cosmologies
