@@ -1,6 +1,8 @@
 *~
 output/*/R_mats/*
 output/*/chains/*
+output/*/mixed_chains/*
+output/*/rotated_chains/*
 output/*/figures/*
 
 # Byte-compiled / optimized / DLL files
