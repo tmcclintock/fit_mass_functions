@@ -41,12 +41,12 @@ cov_path  = "N_data/Box%03d/Box%03d_cov_Z%d.txt"
 
 #This contains our parameterization
 name = 'deg'
-N_parameters = 6
 corner_labels = [r"$d0$",r"$d1$",r"$e0$",r"$e1$",r"$f0$",r"$f1$",r"$g0$",r"$g1$"]
 if name is 'dfg':
     corner_labels = [r"$d0$",r"$d1$",r"$f0$",r"$f1$",r"$g0$",r"$g1$"]
 if name is 'deg':
     corner_labels = [r"$d0$",r"$d1$",r"$e0$",r"$e1$",r"$g0$",r"$g1$"]
+N_parameters = len(corner_labels)
 Tinker_defaults = {'d':1.97, 'e':1.0, "f": 0.51, 'g':1.228}
 guesses = np.array([2.13, 0.11, 1.1, 0.2, 1.25, 0.11]) #d0,d1,e0,e1,g0,g1
 #guesses = np.array([2.13, 0.11, 1.1, 0.2, 0.41, 0.15, 1.25, 0.11]) #d0,d1,e0,e1,f0,f1,g0,g1
