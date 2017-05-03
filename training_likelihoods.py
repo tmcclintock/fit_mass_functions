@@ -14,10 +14,10 @@ def lnlike_no_scatter(d,e,f,g,a,z,lM_bins,N_data,cov_data,icov_data,volume,MF_mo
         MF_model[i].set_parameters(d[i],e[i],f[i],g[i])
         N = MF_model[i].n_in_bins(lM_bins[i])*volume
         X = N_data[i] - N
-        #LL+= -0.5*np.dot(X,np.dot(icov_data[i],X))
-        cov = cov_data[i] + np.diag(0.0001*N**2)
-        icov = np.linalg.inv(cov)
-        LL+= -0.5*(np.dot(X,np.dot(icov,X)) +np.log(np.linalg.det(cov)))
+        icov = icov_data[i]
+        #cov = cov_data[i] + np.diag(0.0001*N**2)
+        #icov = np.linalg.inv(cov)
+        LL+= -0.5*np.dot(X,np.dot(icov,X))
     return LL
 
 #Posterior

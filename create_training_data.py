@@ -8,12 +8,12 @@ import matplotlib.pyplot as plt
 
 ################################################
 #CREATE THE OUTPUT FILES FROM SCRATCH OR NO?
-from_scratch = True
+from_scratch = False
 ################################################
 
 #Choose which modes to run
-run_test = True
-run_best_fit = True
+run_test = False
+run_best_fit = False
 run_bf_comparisons = False
 run_mcmc = False
 run_mcmc_comparisons = False
@@ -22,7 +22,7 @@ see_corner = False
 
 #MCMC configuration
 nwalkers, nsteps = 16, 5000
-nburn = 2000
+nburn = 1000
 
 #Scale factors, redshifts, volume
 scale_factors = np.array([0.25, 0.333333, 0.5, 0.540541, 0.588235, 
@@ -40,18 +40,32 @@ data_path = "N_data/Box%03d/Box%03d_Z%d.txt"
 cov_path  = "N_data/Box%03d/Box%03d_cov_Z%d.txt"
 
 #This contains our parameterization
-name = 'def'
+name = 'deg'
 N_parameters = 6
-corner_labels = [r"$d0$",r"$d1$",r"$e0$",r"$e1$",r"$g0$",r"$g1$"]
+corner_labels = [r"$d0$",r"$d1$",r"$e0$",r"$e1$",r"$f0$",r"$f1$",r"$g0$",r"$g1$"]
+if name is 'dfg':
+    corner_labels = [r"$d0$",r"$d1$",r"$f0$",r"$f1$",r"$g0$",r"$g1$"]
+if name is 'deg':
+    corner_labels = [r"$d0$",r"$d1$",r"$e0$",r"$e1$",r"$g0$",r"$g1$"]
 Tinker_defaults = {'d':1.97, 'e':1.0, "f": 0.51, 'g':1.228}
 guesses = np.array([2.13, 0.11, 1.1, 0.2, 1.25, 0.11]) #d0,d1,e0,e1,g0,g1
 #guesses = np.array([2.13, 0.11, 1.1, 0.2, 0.41, 0.15, 1.25, 0.11]) #d0,d1,e0,e1,f0,f1,g0,g1
 header = "d0\td1\te0\te1\tg0\tg1"
 #header = "d0\td1\te0\te1\tf0\tf1\tg0\tg1"
 def get_params(model, sf):
-    e0,e1,f0,f1,g0,g1 = model
+    Tinker_defaults = {'d':1.97, 'e':1.0, "f": 0.51, 'g':1.228}
+    if name is 'defg':
+        d0,d1,e0,e1,f0,f1,g0,g1 = model
+    if name is 'def':
+        d0,d1,f0,f1,g0,g1 = model
+        f0 = Tinker_defaults['f']
+        f1 = 0.0
+    if name is 'dfg':
+        d0,d1,f0,f1,g0,g1 = model
+        e0 = Tinker_defaults['e']
+        e1 = 0.0
     k = sf - 0.5
-    d = Tinker_defaults['d']
+    d = d0 + k*d1
     e = e0 + k*e1
     f = f0 + k*f1
     g = g0 + k*g1
