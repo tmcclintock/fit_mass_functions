@@ -13,15 +13,13 @@ from_scratch = False
 
 #Choose which modes to run
 run_test = False
-run_best_fit = False
-run_bf_comparisons = False
-run_mcmc = False
+run_best_fit = True
+run_mcmc = True
 run_mcmc_comparisons = False
 calculate_chi2 = False
-see_corner = False
 
 #MCMC configuration
-nwalkers, nsteps = 16, 5000
+nwalkers, nsteps = 16, 10000
 nburn = 1000
 
 #Scale factors, redshifts, volume
@@ -40,24 +38,30 @@ data_path = "N_data/Box%03d/Box%03d_Z%d.txt"
 cov_path  = "N_data/Box%03d/Box%03d_cov_Z%d.txt"
 
 #This contains our parameterization
-name = 'deg'
-corner_labels = [r"$d0$",r"$d1$",r"$e0$",r"$e1$",r"$f0$",r"$f1$",r"$g0$",r"$g1$"]
-if name is 'dfg':
-    corner_labels = [r"$d0$",r"$d1$",r"$f0$",r"$f1$",r"$g0$",r"$g1$"]
-if name is 'deg':
-    corner_labels = [r"$d0$",r"$d1$",r"$e0$",r"$e1$",r"$g0$",r"$g1$"]
+name = 'defg'
+corner_labels = []
+header = ""
+for i,l in zip(range(len(name)), name):
+    corner_labels.append(r"$%s_0$"%l)
+    corner_labels.append(r"$%s_1$"%l)
+    header += "%s0\t"%l
+    header += "%s1\t"%l
+header +="\n"
+N_parameters = len(corner_labels)
 N_parameters = len(corner_labels)
 Tinker_defaults = {'d':1.97, 'e':1.0, "f": 0.51, 'g':1.228}
-guesses = np.array([2.13, 0.11, 1.1, 0.2, 1.25, 0.11]) #d0,d1,e0,e1,g0,g1
-#guesses = np.array([2.13, 0.11, 1.1, 0.2, 0.41, 0.15, 1.25, 0.11]) #d0,d1,e0,e1,f0,f1,g0,g1
-header = "d0\td1\te0\te1\tg0\tg1"
-#header = "d0\td1\te0\te1\tf0\tf1\tg0\tg1"
+#guesses = np.array([2.13, 0.11, 1.1, 0.2, 1.25, 0.11]) #d0,d1,e0,e1,g0,g1
+guesses = np.array([2.13, 0.11, 1.1, 0.2, 0.41, 0.15, 1.25, 0.11]) #d0,d1,e0,e1,f0,f1,g0,g1
+Tinker_defaults = {'d':1.97, 'e':1.0, "f": 0.51, 'g':1.228}
 def get_params(model, sf):
-    Tinker_defaults = {'d':1.97, 'e':1.0, "f": 0.51, 'g':1.228}
     if name is 'defg':
         d0,d1,e0,e1,f0,f1,g0,g1 = model
     if name is 'def':
-        d0,d1,f0,f1,g0,g1 = model
+        d0,d1,e0,e1,f0,f1 = model
+        g0 = Tinker_defaults['g']
+        g1 = 0.0
+    if name is 'deg':
+        d0,d1,e0,e1,g0,g1 = model
         f0 = Tinker_defaults['f']
         f1 = 0.0
     if name is 'dfg':
@@ -126,7 +130,8 @@ for i in xrange(box_lo,box_hi):
     
     if run_test:
         test = TL.lnprob(guesses,scale_factors,redshifts,lM_bin_array,
-                         N_data_array,cov_array,icov_array,volume,TMF_array)
+                         N_data_array,cov_array,icov_array,volume,TMF_array,
+                         name, Tinker_defaults)
         print "Test result = %f\n"%test
 
     if run_best_fit:
@@ -134,34 +139,25 @@ for i in xrange(box_lo,box_hi):
         result = op.minimize(nll,guesses,
                              args=(scale_factors,redshifts,lM_bin_array,
                                    N_data_array,cov_array,icov_array,volume,
-                                   TMF_array),
+                                   TMF_array, name, Tinker_defaults),
                              method="Powell")
         best_fit_models[i] = result['x']
         print "Best fit for Box%03d:\n%s\n"%(i,result)
-
-    if run_bf_comparisons:
-        for j in range(z_lo,z_hi):
-            d,e,f,g = get_params(best_fit_models[i],scale_factors[j])
-            TMF_array[j].set_parameters(d,e,f,g)
-            N = TMF_array[j].n_in_bins(lM_bin_array[j])*volume
-            N_err = np.sqrt(np.diagonal(cov_array[j]))
-            visualize.NM_plot(lM_array[j],N_data_array[j],N_err,
-                              lM_array[j],N, title="Bf Box%03d z=%.2f"%(i,redshifts[j]))
-            
+          
     if run_mcmc:
         ndim = N_parameters
         start = best_fit_models[i]
-        pos = [start + 1e-2*np.random.randn(ndim) for k in range(nwalkers)]
-        sampler = emcee.EnsembleSampler(nwalkers,ndim,TL.lnprob,
+        print start
+        pos = [start + 1e-3*np.random.randn(ndim) for k in range(nwalkers)]
+        sampler = emcee.EnsembleSampler(nwalkers, ndim, TL.lnprob,
                                         args=(scale_factors,redshifts,lM_bin_array,
                                               N_data_array,cov_array,icov_array,volume,
-                                              TMF_array))
+                                              TMF_array, name, Tinker_defaults),threads = 8)
         print "Performing MCMC on Box%03d for %s"%(i, name)
         sampler.run_mcmc(pos,nsteps)
         print "MCMC complete for Box%03d\n"%(i)
         fullchain = sampler.flatchain
         likes = sampler.flatlnprobability
-        burn = fullchain[:nwalkers*nburn]
         chain = fullchain[nwalkers*nburn:]
         np.savetxt(base_dir+"chains/Box%03d_chain.txt"%(i),fullchain,header=header)
         np.savetxt(base_dir+"chains/Box%03d_likes.txt"%(i),likes)
@@ -193,14 +189,6 @@ for i in xrange(box_lo,box_hi):
             chi2s[i,j] = chi2
         print "Chi2s for Box%03d are:"%i
         print chi2s[i]
-
-    if see_corner:
-        fullchain = np.loadtxt(base_dir+"chains/Box%03d_chain.txt"%(i))
-        chain = fullchain[nwalkers*nburn:]
-        fig = corner.corner(chain,labels=corner_labels,plot_datapoints=False)
-        plt.gcf().savefig(base_dir+"figures/Box%03d_corner.png"%(i))
-        plt.show()
-        plt.close()        
 
     #Save the models
     np.savetxt(base_save+"bests.txt",best_fit_models,header=header)
