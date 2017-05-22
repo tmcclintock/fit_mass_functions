@@ -13,7 +13,7 @@ from_scratch = False
 
 #Choose which modes to run
 run_test = False
-run_best_fit = True
+run_best_fit = False
 run_mcmc = True
 run_mcmc_comparisons = False
 calculate_chi2 = False
@@ -38,22 +38,38 @@ data_path = "N_data/Box%03d/Box%03d_Z%d.txt"
 cov_path  = "N_data/Box%03d/Box%03d_cov_Z%d.txt"
 
 #This contains our parameterization
-name = 'defg'
+name = 'dfgB'
 corner_labels = []
 header = ""
 for i,l in zip(range(len(name)), name):
-    corner_labels.append(r"$%s_0$"%l)
-    corner_labels.append(r"$%s_1$"%l)
-    header += "%s0\t"%l
-    header += "%s1\t"%l
+    if l is 'B':
+        corner_labels.append(r"$%s$"%l)
+        header += "%s\t"%l
+    else:
+        corner_labels.append(r"$%s_0$"%l)
+        corner_labels.append(r"$%s_1$"%l)
+        header += "%s0\t"%l
+        header += "%s1\t"%l
 header +="\n"
 N_parameters = len(corner_labels)
 N_parameters = len(corner_labels)
 Tinker_defaults = {'d':1.97, 'e':1.0, "f": 0.51, 'g':1.228}
-#guesses = np.array([2.13, 0.11, 1.1, 0.2, 1.25, 0.11]) #d0,d1,e0,e1,g0,g1
-guesses = np.array([2.13, 0.11, 1.1, 0.2, 0.41, 0.15, 1.25, 0.11]) #d0,d1,e0,e1,f0,f1,g0,g1
+#The initial guesses
+#d0,d1,e0,e1,f0,f1,g0,g1,B
+guesses = np.array([2.13, 0.11, 1.1, 0.2, 0.41, 0.15, 1.25, 0.11, 0.47, 0.0]) 
+if name is 'deg': guesses = np.array([2.13, 0.11, 1.1, 0.2, 1.25, 0.11])
+if name is 'defg': guesses = np.array([2.13, 0.11, 1.1, 0.2, 0.41, 0.15, 1.25, 0.11])
+if name is 'dfg': guesses = np.array([2.13, 0.11, 0.41, 0.15, 1.25, 0.11])
+if name is 'dfgB': guesses = np.array([2.13, 0.11, 0.41, 0.15, 1.25, 0.11, 0.47])
+
 Tinker_defaults = {'d':1.97, 'e':1.0, "f": 0.51, 'g':1.228}
-def get_params(model, sf):
+def get_params(model, sf): #Meant for a single scale factor
+    k = sf - 0.5
+    B = None
+    if name is 'dfgB':
+        d0,d1,f0,f1,g0,g1,B = params
+        e0 = Tinker_defaults['e']
+        e1 = 0.0
     if name is 'defg':
         d0,d1,e0,e1,f0,f1,g0,g1 = model
     if name is 'def':
@@ -68,12 +84,11 @@ def get_params(model, sf):
         d0,d1,f0,f1,g0,g1 = model
         e0 = Tinker_defaults['e']
         e1 = 0.0
-    k = sf - 0.5
     d = d0 + k*d1
     e = e0 + k*e1
     f = f0 + k*f1
     g = g0 + k*g1
-    return d,e,f,g
+    return d,e,f,g,B
 
 #Create the output files
 base_dir = "output/%s/"%name
@@ -93,7 +108,6 @@ else:
     mean_models = np.loadtxt(base_save+"means.txt")
     var_models = np.loadtxt(base_save+"vars.txt")
     chi2s = np.loadtxt(base_save+"BFchi2s.txt")
-
 #Loop over cosmologies and redshifts
 box_lo,box_hi = 0,39
 z_lo,z_hi = 0,10
@@ -151,8 +165,8 @@ for i in xrange(box_lo,box_hi):
         pos = [start + 1e-3*np.random.randn(ndim) for k in range(nwalkers)]
         sampler = emcee.EnsembleSampler(nwalkers, ndim, TL.lnprob,
                                         args=(scale_factors,redshifts,lM_bin_array,
-                                              N_data_array,cov_array,icov_array,volume,
-                                              TMF_array, name, Tinker_defaults),threads = 8)
+                                              N_data_array,cov_array,icov_array, volume,
+                                              TMF_array, name, Tinker_defaults), threads = 8)
         print "Performing MCMC on Box%03d for %s"%(i, name)
         sampler.run_mcmc(pos,nsteps)
         print "MCMC complete for Box%03d\n"%(i)
@@ -166,8 +180,8 @@ for i in xrange(box_lo,box_hi):
 
     if run_mcmc_comparisons:
         for j in range(z_lo,z_hi):
-            d,e,f,g = get_params(best_fit_models[i],scale_factors[j])
-            TMF_array[j].set_parameters(d,e,f,g)
+            d,e,f,g,B = get_params(best_fit_models[i],scale_factors[j])
+            TMF_array[j].set_parameters(d,e,f,g,B)
             N = TMF_array[j].n_in_bins(lM_bin_array[j])*volume
             N_err = np.sqrt(np.diagonal(cov_array[j]))
             sigdif = (N_data_array[j]-N)/N_err
@@ -178,8 +192,8 @@ for i in xrange(box_lo,box_hi):
 
     if calculate_chi2:
         for j in range(z_lo,z_hi):
-            d,e,f,g = get_params(best_fit_models[i],scale_factors[j])
-            TMF_array[j].set_parameters(d,e,f,g)
+            d,e,f,g,B = get_params(best_fit_models[i],scale_factors[j])
+            TMF_array[j].set_parameters(d,e,f,g,B)
             N_fit = TMF_array[j].n_in_bins(lM_bin_array[j])*volume
             N_data = N_data_array[j]
             X = N_data-N_fit

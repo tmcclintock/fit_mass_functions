@@ -5,16 +5,16 @@ import numpy as np
 import corner, sys, os
 import matplotlib.pyplot as plt
 
-old_labels = [r"$e0$",r"$e1$",r"$f0$",r"$f1$",r"$g0$",r"$g1$"]
+model = "defg"
+#old_labels = [r"$e0$",r"$e1$",r"$f0$",r"$f1$",r"$g0$",r"$g1$"]
 
 N_z     = 10
 N_boxes = 39
-N_p     = 6 #Number of parameters
+N_p     = 2*len(model) #Number of parameters
 mean_models = np.zeros((N_boxes, N_p))
 var_models  = np.zeros((N_boxes, N_p))
 
 #Just use Box000 to find the rotations
-model = "efg"
 base_dir = "./%s"%model
 inbase = base_dir+"/chains/Box%03d_chain.txt"
 base_save = base_dir+"_rotated/"
