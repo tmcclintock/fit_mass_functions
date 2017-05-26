@@ -5,7 +5,7 @@ import numpy as np
 import corner, sys, os
 import matplotlib.pyplot as plt
 
-model = "defg"
+model = "dfgB"
 #old_labels = [r"$e0$",r"$e1$",r"$f0$",r"$f1$",r"$g0$",r"$g1$"]
 
 N_z     = 10
