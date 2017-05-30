@@ -18,7 +18,7 @@ var_models  = np.zeros((N_boxes, N_p))
 base_dir = "./%s"%model
 inbase = base_dir+"/chains/Box%03d_chain.txt"
 base_save = base_dir+"_rotated/"
-chainout = base_save+"chains/rotated_Box%03d_chain.txt"
+chainout = base_save+"rotated_chains/rotated_Box%03d_chain.txt"
 Rout     = base_save+"R_mats/R%03d.txt"
 
 os.system("mkdir -p %s"%base_save)
