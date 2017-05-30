@@ -10,7 +10,7 @@ model = "dfgB"
 
 N_z     = 10
 N_boxes = 39
-N_p     = 2*len(model) #Number of parameters
+N_p     = 7 #Number of parameters
 mean_models = np.zeros((N_boxes, N_p))
 var_models  = np.zeros((N_boxes, N_p))
 
