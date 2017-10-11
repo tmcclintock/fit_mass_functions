@@ -8,14 +8,12 @@ import matplotlib.pyplot as plt
 old_labels = [r"$d0$",r"$d1$",r"$f0$",r"$f1$",r"$g0$",r"$g1$"]
 
 N_z = 10
-N_boxes = 39
+N_boxes = 40
 N_p = 6
 mean_models = np.zeros((N_boxes,N_p))
 var_models = np.zeros((N_boxes,N_p))
 
-#Just use Box000 to find the rotations
-index = 0
-inbase = "../6params/chains/Box%03d_chain.txt"
+inbase = "../dfg/chains/Box%03d_chain.txt"
 
 outbase = "./rotated_chains/Rotated_Box%03d_chain.txt"
 
@@ -59,4 +57,3 @@ if rotate:
         #plt.show()
     np.savetxt("./rotated_dfg_means.txt",mean_models)
     np.savetxt("./rotated_dfg_vars.txt",var_models)
-    #np.savetxt("./R_matrix.txt",R)

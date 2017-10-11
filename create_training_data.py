@@ -14,9 +14,9 @@ from_scratch = False
 #Choose which modes to run
 run_test = False
 run_best_fit = False
-run_mcmc = True
+run_mcmc = False
 run_mcmc_comparisons = False
-calculate_chi2 = False
+calculate_chi2 = True
 
 #MCMC configuration
 nwalkers, nsteps = 16, 10000
@@ -29,7 +29,7 @@ redshifts = 1./scale_factors - 1.0
 volume = 1050.**3 #[Mpc/h]^3
 
 #Gather the cosmological parameters
-N_boxes = 39 #39th is broken
+N_boxes = 40 #39th is broken
 N_z = 10 
 cosmologies = np.genfromtxt("cosmos.txt")
 
@@ -38,7 +38,7 @@ data_path = "N_data/Box%03d/Box%03d_Z%d.txt"
 cov_path  = "N_data/Box%03d/Box%03d_cov_Z%d.txt"
 
 #This contains our parameterization
-name = 'dfgB'
+name = 'dfg'
 corner_labels = []
 header = ""
 for i,l in zip(range(len(name)), name):
@@ -103,13 +103,13 @@ if from_scratch:
     np.savetxt(base_save+"vars.txt",var_models)
     chi2s = np.zeros((N_boxes,N_z))
     np.savetxt(base_save+"BFchi2s.txt",chi2s)
-else: 
+else:
     best_fit_models = np.loadtxt(base_save+"bests.txt")
     mean_models = np.loadtxt(base_save+"means.txt")
     var_models = np.loadtxt(base_save+"vars.txt")
     chi2s = np.loadtxt(base_save+"BFchi2s.txt")
 #Loop over cosmologies and redshifts
-box_lo,box_hi = 0,39
+box_lo,box_hi = 39,40
 z_lo,z_hi = 0,10
 for i in xrange(box_lo,box_hi):
     #Get in the cosmology and create a cosmo_dict
